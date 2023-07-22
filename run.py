@@ -1,14 +1,14 @@
 import asyncio
 import streamlit as st
 import pandas as pd
-import pandas_datareader as pdr
+import yfinance as yf
 import datetime
 import numpy as np
 
 # Define the function to perform the backtesting
 async def backtest(ticker, start_date, end_date, initial_investment, ma_period, buy_below_pct):
     loop = asyncio.get_event_loop()
-    data = await loop.run_in_executor(None, pdr.get_data_yahoo, ticker, start_date, end_date)
+    data = await loop.run_in_executor(None, yf.download, ticker, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'))
 
     data[f'SMA_{ma_period}'] = data['Close'].rolling(window=ma_period).mean()
     data['Buy_Signal'] = data['Close'].shift() < data[f'SMA_{ma_period}'].shift() * (1 - buy_below_pct / 100)
