@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import pandas_datareader as pdr
 import datetime
-from scipy.stats import sharpe_ratio
+import numpy as np
 
 # Define the function to perform the backtesting
 async def backtest(ticker, start_date, end_date, initial_investment, ma_period, buy_below_pct):
@@ -33,10 +33,11 @@ async def backtest(ticker, start_date, end_date, initial_investment, ma_period, 
     # Calculate performance metrics
     years = (end_date - start_date).days / 365.25
     annualized_return = (money / initial_investment) ** (1/years) - 1
-    # Assuming risk-free rate to be 0 for simplicity
-    sharpe = sharpe_ratio(data['Close'].pct_change().dropna(), 0)
 
-    return money, annualized_return, sharpe, data
+    # Assuming risk-free rate to be 0 for simplicity, and calculate the Sharpe ratio
+    sharpe_ratio = data['Close'].pct_change().dropna().mean() / data['Close'].pct_change().dropna().std() * np.sqrt(252)
+
+    return money, annualized_return, sharpe_ratio, data
 
 # Streamlit code to create the web UI
 st.title("SPX Backtesting Tool")
